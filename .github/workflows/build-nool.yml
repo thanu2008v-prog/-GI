@@ -1,1 +1,12 @@
+name: test-actions
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Actions is working!"
