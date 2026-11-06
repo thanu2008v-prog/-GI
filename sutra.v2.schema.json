@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "senthamil-marabu/sutra.v2.schema.json",
+  "title": "Senthamil Marabu Sutra v2.0 — நூல் கூறும் அடுக்குகள்",
+  "description": "அமைப்பு: சூத்திரம் → ஓத்து → படலம் → பிண்டம் (பொருள். 470). அடுக்குகள்: மூலம் (முதல்வன் — மாற்றக் கூடாது, பொருள். 652); காண்டிகை = பொருள் + ஏது + எடுத்துக்காட்டு (பொருள். 647, 648); உரை = இயைபு + விதி/விலக்கு + மறுதலைக் கடாஅ + துணிவு (பொருள். 645, 649, 650). நிலை மூன்றே (நூலில் நேரடியாக / ஒருதலை அன்மை / நூலில் இல்லை). பிறன் கோள் தனிப் புலம் (பொருள். 656).",
+  "type": "object",
+  "required": ["id", "pindam", "padalam", "othu", "sutra", "moolam", "kaandigai", "nilai"],
+  "additionalProperties": false,
+  "$defs": {
+    "ref": { "type": "string", "pattern": "^(ezhu|sol|porul)\\.\\d+$" },
+    "nilai": { "enum": ["நூலில் நேரடியாக", "ஒருதலை அன்மை", "நூலில் இல்லை"] },
+    "quote": {
+      "type": "object",
+      "description": "நூலுள்ளிருந்து எடுத்த மேற்கோள்; text, from-இன் செய்யுளில் எழுத்துக்கு எழுத்து இருக்க வேண்டும்.",
+      "required": ["text", "from"],
+      "additionalProperties": false,
+      "properties": { "text": { "type": "string", "minLength": 1 }, "from": { "$ref": "#/$defs/ref" } }
+    }
+  },
+  "properties": {
+    "id": { "$ref": "#/$defs/ref" },
+    "pindam": { "const": 1, "description": "ஒரு பிண்டம் (பொருள். 474)" },
+    "padalam": { "enum": ["ezhuthu", "sol", "porul"], "description": "பொது மொழி கிளந்த படலம் (பொருள். 473)" },
+    "othu": { "type": "integer", "minimum": 1, "maximum": 9, "description": "இன மொழி கிளந்த ஓத்து (பொருள். 472)" },
+    "sutra": { "type": "integer", "minimum": 1, "maximum": 656 },
+    "moolam": {
+      "type": "string", "minLength": 1,
+      "description": "சூத்திரச் சொல் — செந்தமிழ் மரபு ஆவணப் பாடம்; ஒரு சொல்லும் மாற்றப்படாது (பொருள். 640, 652). ஒவ்வொரு கட்டமைப்பிலும் SHA-256 கைரேகையால் சரிபார்க்கப்படும்."
+    },
+    "kaandigai": {
+      "type": "object",
+      "description": "\"பழிப்பு இல் சூத்திரம் பட்ட பண்பின் / கரப்பு இன்றி முடிவது காண்டிகை ஆகும்\" (பொருள். 647); \"ஏது நடையினும் எடுத்துக்காட்டினும் / மேவாங்கு அமைந்த மெய்ந் நெறித்து அதுவே\" (பொருள். 648).",
+      "required": ["porul"],
+      "additionalProperties": false,
+      "properties": {
+        "porul": { "type": "string", "minLength": 1, "description": "சூத்திரச் சொல்லின் பொருள் — கரப்பின்றி" },
+        "ethu": { "type": "string", "description": "ஏது நடை — நூற்பா ஏன் அவ்வாறு என்பதற்கு நூலுள் காரணம்" },
+        "eduthukkaattu": { "type": "array", "items": { "$ref": "#/$defs/quote" }, "description": "நூலுள் உள்ள வடிவம் மட்டும்" },
+        "en": {
+          "type": "object", "additionalProperties": false,
+          "description": "நூற்பா தானே கூறும் எண்ணும் எண்ணிய எண்ணும்",
+          "properties": { "kooruvathu": { "type": ["integer", "null"] }, "enniyathu": { "type": ["integer", "null"] } }
+        }
+      }
+    },
+    "urai": {
+      "type": "object",
+      "description": "\"சூத்திரத்துட் பொருள் அன்றியும் யாப்புற / இன்றியமையாது இயைபவை எல்லாம் / ஒன்ற உரைப்பது உரை எனப்படுமே\" (பொருள். 649); பொருள். 645, 650.",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "iyaipu": { "type": "array", "items": { "$ref": "#/$defs/ref" }, "description": "இன்றியமையாது இயையும் பிற நூற்பா" },
+        "vagai": { "enum": ["விதி", "விலக்கு", "விதி-விலக்கு"], "description": "\"விதித்தலும் விலக்கலும் என இரு வகையொடு\" (பொருள். 645)" },
+        "vilakkukkuriyathu": { "type": "array", "items": { "$ref": "#/$defs/ref" }, "description": "விலக்கு எனில், எந்த விதிக்கு" },
+        "maruthalai": {
+          "type": "array",
+          "description": "\"மறுதலைக் கடாஅ மாற்றமும் உடைத்தாய்\" (பொருள். 650)",
+          "items": {
+            "type": "object", "required": ["kadaa", "maattram"], "additionalProperties": false,
+            "properties": {
+              "kadaa": { "type": "string", "description": "மறுப்புக் கேள்வி" },
+              "maattram": { "type": "string", "description": "நூலால் விடை" },
+              "saanru": { "type": "array", "items": { "$ref": "#/$defs/quote" } }
+            }
+          }
+        },
+        "thunivu": { "type": "string", "description": "\"தெற்றென ஒரு பொருள் ஒற்றுமை கொளீஇ / துணிவொடு நிற்றல்\" (பொருள். 650)" },
+        "text": { "type": "string", "description": "ஆவணத்தில் உள்ள உரைப் பத்தி (மனிதர் வாசிக்க)" }
+      }
+    },
+    "nilai": { "$ref": "#/$defs/nilai" },
+    "utthi": {
+      "type": "array", "items": { "type": "string" },
+      "description": "இவ்வுரையில் கையாண்ட உத்திகள் — பொருள். 656-இன் 32 பெயர்களுள் மட்டும்"
+    },
+    "piran_kol": {
+      "type": "array",
+      "description": "பிறன் கோள் — நூலுக்கு வெளியே; நூலின் விடையாகக் கொள்ளப்படாது (பொருள். 656)",
+      "items": { "type": "object", "required": ["text"], "properties": { "text": { "type": "string" }, "moolam": { "type": "string" } } }
+    },
+    "kanini": {
+      "type": "object", "required": ["kind"], "additionalProperties": true,
+      "description": "கணினி வடிவம் — விதியை இயக்கும் தரவு (rules/ கூறுகள் இதைப் பயன்படுத்தும்)",
+      "properties": { "kind": { "enum": ["definition", "rule", "classification", "enumeration", "exception", "meta"] }, "rule_ref": { "type": "string" } }
+    },
+    "links": { "type": "array", "items": { "$ref": "#/$defs/ref" } }
+  }
+}

@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "senthamil-marabu/sutra.schema.json",
+  "title": "Senthamil Marabu Sutra v1.4",
+  "type": "object",
+  "required": [
+    "id",
+    "adhikaram",
+    "othu",
+    "sutra",
+    "verse",
+    "kaandigai",
+    "nul_kurum",
+    "viparam",
+    "kuri",
+    "computer"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^(ezhu|sol|porul)\\.\\d+$"
+    },
+    "adhikaram": {
+      "enum": [
+        "ezhuthu",
+        "sol",
+        "porul"
+      ]
+    },
+    "othu": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9
+    },
+    "sutra": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 656
+    },
+    "verse": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kaandigai": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nul_kurum": {
+      "type": "object",
+      "required": [
+        "text",
+        "function",
+        "kuri"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "function": {
+          "enum": [
+            "DEFINITION_BASE",
+            "CRITERION",
+            "CROSS_REFERENCE",
+            "SCOPE_LIMIT",
+            "STRUCTURE_NOTE",
+            "SELF_EXAMPLE",
+            "RULE",
+            "ENUMERATION",
+            "CLASSIFICATION",
+            "CLASSIFICATION_BASE",
+            "EXCEPTION"
+          ]
+        },
+        "establishes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "criterion_for": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "kuri": {
+          "enum": [
+            "DIRECT",
+            "AMBIGUOUS",
+            "SCOPE_DECLARED"
+          ]
+        }
+      }
+    },
+    "viparam": {
+      "type": "string"
+    },
+    "kuri": {
+      "enum": [
+        "DIRECT",
+        "AMBIGUOUS",
+        "NOT_IN_TEXT",
+        "OTHER_SOURCE",
+        "DERIVED",
+        "SCOPE_DECLARED"
+      ]
+    },
+    "computer": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "definition",
+            "rule",
+            "classification",
+            "enumeration",
+            "exception",
+            "meta"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stated": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "computed": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "match": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      }
+    },
+    "piran_ko": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "commentator",
+          "text"
+        ],
+        "properties": {
+          "commentator": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "citation": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

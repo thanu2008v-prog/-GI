@@ -1,0 +1,41 @@
+{
+  "adhikaram": [
+    "ezhuthu",
+    "sol",
+    "porul"
+  ],
+  "kuri": [
+    "DIRECT",
+    "AMBIGUOUS",
+    "NOT_IN_TEXT",
+    "OTHER_SOURCE",
+    "DERIVED",
+    "SCOPE_DECLARED"
+  ],
+  "nul_kurum_function": [
+    "DEFINITION_BASE",
+    "CRITERION",
+    "CROSS_REFERENCE",
+    "SCOPE_LIMIT",
+    "STRUCTURE_NOTE",
+    "SELF_EXAMPLE",
+    "RULE",
+    "ENUMERATION",
+    "CLASSIFICATION",
+    "CLASSIFICATION_BASE",
+    "EXCEPTION"
+  ],
+  "nul_kurum_kuri": [
+    "DIRECT",
+    "AMBIGUOUS",
+    "SCOPE_DECLARED"
+  ],
+  "computer_kind": [
+    "definition",
+    "rule",
+    "classification",
+    "enumeration",
+    "exception",
+    "meta"
+  ]
+}
