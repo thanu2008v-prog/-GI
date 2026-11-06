@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "செந்தமிழ் மரபு — ஓத்து உரை (திரும்பும் வடிவம்)",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "ethu", "urai"],
+    "additionalProperties": false,
+    "properties": {
+      "id": {"type": "string", "pattern": "^(ezhu|sol|porul)\\.[0-9]+$"},
+      "ethu": {"type": "string", "minLength": 1, "description": "காண்டிகை — ஏது நடை (648)"},
+      "eduthukkaattu": {
+        "type": "array",
+        "description": "காண்டிகை — எடுத்துக்காட்டு (648): நூலின் சொந்தப் பாடத்திலிருந்து மட்டும்",
+        "items": {"type": "object", "required": ["text", "from"], "additionalProperties": false,
+                  "properties": {"text": {"type": "string"}, "from": {"type": "string"}}}
+      },
+      "urai": {
+        "type": "object",
+        "required": ["iyaipu", "vagai", "thunivu", "text"],
+        "additionalProperties": false,
+        "properties": {
+          "iyaipu": {"type": "array", "items": {"type": "string"}, "description": "இயைபு (649): இயையும் நூற்பா எண்கள்"},
+          "vagai": {"enum": ["விதி", "விலக்கு", "விதி-விலக்கு"], "description": "645"},
+          "vilakkukkuriyathu": {"type": "array", "items": {"type": "string"}, "description": "எந்த நூற்பாவுக்கு விலக்கு"},
+          "maruthalai": {
+            "type": "array",
+            "description": "மறுதலைக் கடாஅ மாற்றம் (650)",
+            "items": {"type": "object", "required": ["kadaa", "maattram"], "additionalProperties": false,
+                      "properties": {"kadaa": {"type": "string"}, "maattram": {"type": "string"},
+                                     "saanru": {"type": "array", "items": {"type": "object",
+                                       "properties": {"text": {"type": "string"}, "from": {"type": "string"}}}}}}
+          },
+          "thunivu": {"type": "string", "description": "துணிவு (650): நூலில் நேரடியாக / ஒருதலை அன்மை / நூலில் இல்லை"},
+          "text": {"type": "string", "minLength": 1, "description": "உரை — வாசிக்கும் வடிவம்"}
+        }
+      }
+    }
+  }
+}
