@@ -1,17 +1,81 @@
 name: build-nool
+
 on:
   push:
     branches: [main]
     tags: ['v*']
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Test
-        run: echo "Actions working"
+          cache: pip
+
+      - name: Install deps
+        run: |
+          pip install -r requirements.txt
+          pip install "PyYAML>=6.0"
+
+      - name: Check SQLite FTS5
+        run: |
+          python3 -c "
+          import sqlite3, sys
+          print('sqlite:', sqlite3.sqlite_version)
+          if sqlite3.sqlite_version_info < (3, 34): sys.exit('need SQLite >= 3.34')
+          c = sqlite3.connect(':memory:')
+          try: c.execute(\"CREATE VIRTUAL TABLE t USING fts5(x, tokenize='trigram')\")
+          except sqlite3.OperationalError as e: sys.exit(f'FTS5 trigram unavailable: {e}')
+          print('FTS5 trigram OK')
+          "
+
+      - name: Build v2 (bundle + db + csv + yaml)
+        run: python3 scripts/build_v2.py
+
+      - name: Build nūl + round-trip
+        run: python3 scripts/build_nool.py
+
+      - name: Verify against the nūl's own rules
+        run: python3 scripts/check_nool.py
+
+      - name: Build single-file edition
+        run: |
+          python3 scripts/build_single_file.py --dry | tee build/dry.log
+          python3 scripts/build_single_file.py --sha | tee build/sha.log
+          python3 scripts/build_single_file.py       | tee build/build.log
+
+      - name: Sanity-check 1602
+        run: |
+          f=build/SENTHAMIL_MARABU.md
+          n=$(grep -c '^### \(ezhu\|sol\|porul\)\.' "$f")
+          echo "sutra headings: $n"
+          [ "$n" -eq 1602 ] || exit 1
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SENTHAMIL_MARABU
+          path: build/SENTHAMIL_MARABU.md
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/SENTHAMIL_MARABU.md
+            build/sha.log
+            .zenodo.json
+            CITATION.cff
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
