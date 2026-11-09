@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ta">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>செந்தமிழ் மரபு</title>
+  <script src="app/app.js"></script>
+  <style>
+    body { font-family: system-ui, 'Noto Sans Tamil', sans-serif; max-width: 780px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; }
+    .record { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    .layer { margin: .4rem 0; white-space: pre-line; }
+    .layer b { color: #a00; }
+    .n-direct { color: #080; } .n-ambig { color: #c80; } .n-absent { color: #c00; }
+    #search { width: 100%; padding: .5rem; font-size: 1.1rem; box-sizing: border-box; }
+    #list a { display: block; padding: .3rem 0; text-decoration: none; color: #036; }
+  </style>
+</head>
+<body>
+  <h1>செந்தமிழ் மரபு</h1>
+  <input id="search" placeholder="தேடுக… (எ.கா. குற்றியலுகரம்)">
+  <div id="list"></div>
+  <div id="detail"></div>
+  <script>
+    (async () => {
+      await SenthamilApp.init('./build/bundle_v2.json');
+      const list = document.getElementById('list');
+      const detail = document.getElementById('detail');
+      const search = document.getElementById('search');
+      const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      const ncls = (n) => n === 'நூலில் நேரடியாக' ? 'n-direct' : n === 'ஒருதலை அன்மை' ? 'n-ambig' : 'n-absent';
+      const renderList = (ids) => {
+        list.innerHTML = ids.slice(0, 100).map(id => {
+          const r = SenthamilApp.get(id);
+          return `<a href="#" data-id="${id}">${esc(SenthamilApp.label(id))} · <span class="${ncls(r.nilai)}">${esc(r.nilai)}</span> · ${esc(r.moolam.replace(/\n/g, ' ').slice(0, 60))}…</a>`;
+        }).join('');
+      };
+      list.addEventListener('click', (e) => {
+        const a = e.target.closest('a[data-id]');
+        if (!a) return;
+        e.preventDefault();
+        const rec = SenthamilApp.renderRecord(a.dataset.id);
+        const extra = (name, xs) => xs.length ? `<div class="layer"><b>${name}:</b> ${esc(xs.join(', '))}</div>` : '';
+        detail.innerHTML = `
+          <div class="record">
+            <h3>${esc(rec.header)}</h3>
+            ${rec.layers.filter(l => l.body).map(l => `<div class="layer"><b>${esc(l.name)}:</b> ${esc(l.body)}</div>`).join('')}
+            ${extra('இயைபு (649)', rec.iyaipu)}
+            ${extra('இதனை விலக்குவன (645)', rec.vilakku)}
+            ${extra('இதனைச் சுட்டுவன', rec.cited_by)}
+          </div>`;
+      });
+      search.addEventListener('input', (e) => {
+        const q = e.target.value.trim();
+        if (q.length < 2) return renderList(SenthamilApp.getOthu('ezhuthu', 1).map(x => x.id));
+        renderList(SenthamilApp.search(q).map(x => x.id));
+      });
+      renderList(SenthamilApp.getOthu('ezhuthu', 1).map(x => x.id));
+    })();
+  </script>
+</body>
+</html>

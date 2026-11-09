@@ -1,42 +1,28 @@
-"""Merge all JSONL into a single bundle.json for the app."""
-import json, glob
+"""scripts/export_bundle.py — data_v2 (மூலம்) → build/bundle_v2.json (செயலிக்கு).
+
+முன்பு இது பழைய v1 தரவிலிருந்து (data/sutras) build/bundle.json உருவாக்கியது; அதில் உரை
+இல்லை, செயலியும் இப்போது அதைப் படிப்பதில்லை. மூலம் data_v2 ஒன்றே (PLAN.md), ஆகவே இது
+build_v2.py-இன் அதே தொகுப்பு முறையைப் பயன்படுத்துகிறது — இரண்டு வடிவம் இருந்தால் மாறுகோள் எழும்
+(பொருள். 468 "மாறுகோள் இன்றி").
+python3 scripts/export_bundle.py
+"""
+import sys
 from pathlib import Path
-from collections import defaultdict
+
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "build/bundle.json"
+sys.path.insert(0, str(ROOT / "scripts"))
+from build_v2 import B, load, build_bundle  # noqa: E402
+
+
 def main():
-    files = sorted(glob.glob(str(ROOT / "data/sutras/**/*.jsonl"), recursive=True))
-    sutras = []
-    for p in files:
-        with open(p, encoding="utf-8") as f:
-            for line in f:
-                if line.strip():
-                    sutras.append(json.loads(line))
-    sutras.sort(key=lambda r: (["ezhuthu","sol","porul"].index(r["adhikaram"]),
-                               r["othu"], r["sutra"]))
-    by_othu, by_kind, by_kuri, by_letter = defaultdict(list), defaultdict(list), defaultdict(list), defaultdict(list)
-    for r in sutras:
-        by_othu[f'{r["adhikaram"]}.{r["othu"]}'].append(r["id"])
-        by_kind[r["computer"]["kind"]].append(r["id"])
-        by_kuri[r["kuri"]].append(r["id"])
-        first = r["verse"][0]
-        by_letter[first].append(r["id"])
-    bundle = {
-        "meta": {"title": "செந்தமிழ் மரபு",
-                 "total_sutras": len(sutras),
-                 "schema": "1.4"},
-        "counts": {
-            "by_adhikaram": {a: sum(1 for r in sutras if r["adhikaram"]==a)
-                             for a in ["ezhuthu","sol","porul"]},
-            "by_kind": {k: len(v) for k, v in by_kind.items()},
-            "by_kuri": {k: len(v) for k, v in by_kuri.items()},
-        },
-        "sutras": sutras,
-        "index": {"by_othu": dict(by_othu), "by_kind": dict(by_kind),
-                  "by_kuri": dict(by_kuri), "by_letter": dict(by_letter)},
-    }
-    OUT.parent.mkdir(exist_ok=True)
-    OUT.write_text(json.dumps(bundle, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"Wrote {OUT} ({len(sutras)} sutras, {OUT.stat().st_size//1024} KB)")
+    B.mkdir(exist_ok=True)
+    recs = load()
+    out = build_bundle(recs)
+    n_urai = sum(1 for r in recs if (r.get("urai") or {}).get("text", "").strip())
+    print(f"Wrote {out.relative_to(ROOT)} ({len(recs)} சூத்திரம், உரை {n_urai}, {out.stat().st_size // 1024} KB)")
+    if len(recs) != 1602:
+        sys.exit(f"சூத்திர எண்ணிக்கை 1602 அல்ல: {len(recs)}")
+
+
 if __name__ == "__main__":
     main()
